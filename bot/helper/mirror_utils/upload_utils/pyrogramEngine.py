@@ -28,7 +28,6 @@ class TgUploader:
         self.__total_files = 0
         self.__is_cancelled = False
         self.__as_doc = AS_DOCUMENT
-        self.__thumb = f"Thumbnails/{listener.message.from_user.id}.jpg"
         self.__sent_msg = None
         self.__msgs_dict = {}
         self.__corrupted = 0
@@ -71,25 +70,14 @@ class TgUploader:
         else:
             cap_mono = f"<code>{file_}</code>"
         notMedia = False
-        thumb = self.__thumb
         self.__is_corrupted = False
         try:
             if not self.__as_doc:
                 duration = 0
                 if file_.upper().endswith(VIDEO_SUFFIXES):
                     duration = get_media_info(up_path)[0]
-                    if thumb is None:
-                        thumb = take_ss(up_path)
-                        if self.__is_cancelled:
-                            if self.__thumb is None and thumb is not None and ospath.lexists(thumb):
-                                osremove(thumb)
-                            return
-                    if thumb is not None:
-                        with Image.open(thumb) as img:
-                            width, height = img.size
-                    else:
-                        width = 480
-                        height = 320
+                    width = 480
+                    height = 320
                     if not file_.upper().endswith(("MKV", "MP4")):
                         file_ = ospath.splitext(file_)[0] + '.mp4'
                         new_path = ospath.join(dirpath, file_)
@@ -101,7 +89,6 @@ class TgUploader:
                                                                   duration=duration,
                                                                   width=width,
                                                                   height=height,
-                                                                  thumb=thumb,
                                                                   supports_streaming=True,
                                                                   disable_notification=True,
                                                                   progress=self.__upload_progress)
@@ -113,7 +100,6 @@ class TgUploader:
                                                                   duration=duration,
                                                                   performer=artist,
                                                                   title=title,
-                                                                  thumb=thumb,
                                                                   disable_notification=True,
                                                                   progress=self.__upload_progress)
                 elif file_.upper().endswith(IMAGE_SUFFIXES):
@@ -125,15 +111,11 @@ class TgUploader:
                 else:
                     notMedia = True
             if self.__as_doc or notMedia:
-                if file_.upper().endswith(VIDEO_SUFFIXES) and thumb is None:
-                    thumb = take_ss(up_path)
+                if file_.upper().endswith(VIDEO_SUFFIXES):
                     if self.__is_cancelled:
-                        if self.__thumb is None and thumb is not None and ospath.lexists(thumb):
-                            osremove(thumb)
                         return
                 self.__sent_msg = self.__sent_msg.reply_document(document=up_path,
                                                                  quote=True,
-                                                                 thumb=thumb,
                                                                  caption=cap_mono,
                                                                  disable_notification=True,
                                                                  progress=self.__upload_progress)
@@ -148,8 +130,6 @@ class TgUploader:
             LOGGER.error(f"{err} Path: {up_path}")
             self.__corrupted += 1
             self.__is_corrupted = True
-        if self.__thumb is None and thumb is not None and ospath.lexists(thumb):
-            osremove(thumb)
         if not self.__is_cancelled:
             osremove(up_path)
 
@@ -167,8 +147,6 @@ class TgUploader:
             self.__as_doc = True
         elif self.__listener.message.from_user.id in AS_MEDIA_USERS:
             self.__as_doc = False
-        if not ospath.lexists(self.__thumb):
-            self.__thumb = None
 
     @property
     def speed(self):
