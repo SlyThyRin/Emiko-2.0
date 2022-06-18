@@ -73,7 +73,7 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
         sendMarkup(start_string, context.bot, update.message, reply_markup)
     else:
-        sendMarkup('Yamerooo! You are not an authorized user. Contact @Devil_Breaker for access details', context.bot, update.message, reply_markup)
+        sendMarkup('Yamerooo! You are not an authorized user. Contact @Devil_Bringer for access details', context.bot, update.message, reply_markup)
 
 def restart(update, context):
     restart_message = sendMessage("Restarting...", context.bot, update.message)
@@ -169,7 +169,7 @@ help_string_telegraph = f'''<br>
 '''
 
 help = telegraph.create_page(
-        title='Mirror-Leech-Bot Help',
+        title='Annie Bot Help',
         content=help_string_telegraph,
     )["path"]
 
